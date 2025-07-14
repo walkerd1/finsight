@@ -2,8 +2,13 @@ name: Run FinSight Time Period Generator Weekly
 
 on:
   schedule:
-    - cron: '0 12 * * 0'  # Every Sunday at 12:00 UTC
+    - cron: '0 0 * * 0'  # Every Sunday at 12:00 AM
+    - cron: '0 0 1 * *'  # Every Month on the 1st day at 12:00 AM
   workflow_dispatch:      # Allows manual runs
+
+concurrency:
+  group: time-period-job
+  cancel-in-progress: true
 
 jobs:
   run-script:

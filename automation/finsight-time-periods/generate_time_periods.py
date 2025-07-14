@@ -82,13 +82,15 @@ def parse_time_period(page):
   try:
     return {
         "name":
-        props["Name"]["title"][0]["text"]["content"],
+          props["Name"]["title"][0]["text"]["content"],
+        "id":
+          page["id"],
         "type":
-        props["Type"]["select"]["name"],
+          props["Type"]["select"]["name"],
         "start":
-        datetime.strptime(props["Start Date"]["date"]["start"], "%Y-%m-%d"),
+          datetime.strptime(props["Start Date"]["date"]["start"], "%Y-%m-%d"),
         "end":
-        datetime.strptime(props["End Date"]["date"]["start"], "%Y-%m-%d"),
+          datetime.strptime(props["End Date"]["date"]["start"], "%Y-%m-%d"),
         "is_current": props["Is Current"]["checkbox"]
     }
   except Exception as e:
@@ -114,6 +116,17 @@ def create_time_period(name: str, type_name: str, start: str, end: str, is_curre
             }
         }
 
+def update_isCurrent_status(period, isCurrent):
+  try:
+    notion.pages.update(
+          page_id=period["id"],
+          properties={
+            "Is Current": {"checkbox": isCurrent}
+          }
+      )
+  except APIResponseError as e:
+    dbg("Failed to update current status of period", e.message, True)
+
 def is_future_period(period, today):
   if period["start"].date() > today and period["end"].date() > today:
     PERIOD_CONFIG[period["type"]][FUTURE].append(period)
@@ -123,10 +136,14 @@ def is_future_period(period, today):
 def is_current_period(period, today):
   if period["start"].date() < today and period["end"].date() > today:
     PERIOD_CONFIG[period["type"]][CURRENT] = period
+    if period["is_current"] == False:
+       update_isCurrent_status(period, True)
     return True
   return False
 
 def is_most_recent_period(period):
+  if period and period["is_current"] == True:
+     update_isCurrent_status(period, False)
   if PERIOD_CONFIG[period['type']][LAST] is None or PERIOD_CONFIG[period['type']][LAST]['end'].date() < period['end'].date():
       PERIOD_CONFIG[period['type']][LAST] = period
       return True
