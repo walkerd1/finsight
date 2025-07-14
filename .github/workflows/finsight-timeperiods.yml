@@ -1,0 +1,30 @@
+name: Run FinSight Time Period Generator Weekly
+
+on:
+  schedule:
+    - cron: '0 12 * * 0'  # Every Sunday at 12:00 UTC
+  workflow_dispatch:      # Allows manual runs
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install python-dotenv notion-client
+
+      - name: Run the script
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: |
+          python automation/finsight-time-periods/generate_time_periods.py
