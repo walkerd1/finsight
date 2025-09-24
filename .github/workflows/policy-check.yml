@@ -1,0 +1,13 @@
+name: policy-check
+on:
+  pull_request:
+    branches: [ main ]
+jobs:
+  conftest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Conftest
+        uses: open-policy-agent/setup-conftest@v1
+      - name: Run policy checks
+        run: conftest test infra/ --policy policy/

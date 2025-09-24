@@ -1,0 +1,14 @@
+{
+  "date": "2025-09-24",
+  "viability_score": 0.57,
+  "gates": {
+    "D1": "pending",
+    "D2": "pending"
+  },
+  "risk_levels": {
+    "sync": "moderate",
+    "csv": "moderate",
+    "auth_store": "moderate",
+    "runway": "high"
+  }
+}

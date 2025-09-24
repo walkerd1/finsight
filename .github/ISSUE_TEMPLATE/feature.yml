@@ -1,0 +1,15 @@
+name: Feature request
+description: Propose a thin, shippable slice
+title: "feat: "
+labels: ["type:feat"]
+body:
+  - type: textarea
+    attributes:
+      label: Slice description
+      description: What is the minimal, testable slice?
+  - type: checkboxes
+    attributes:
+      label: Guards
+      options:
+        - label: Behind a feature flag
+        - label: Telemetry + retention plan

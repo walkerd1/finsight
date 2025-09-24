@@ -1,5 +1,18 @@
-# .gitignore
-.venv/
-__pycache__/
+# Java/Gradle
+/build/
+/out/
+.gradle/
+/target/
+
+# Flutter
+.dart_tool/
+.build/
+
+# Node (if used later)
+node_modules/
+
+# Secrets
 .env
-*.pyc
+*.pem
+*.jks
+*.p12

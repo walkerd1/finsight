@@ -1,0 +1,23 @@
+openapi: 3.0.3
+info:
+  title: FinSight API
+  version: 0.1.0
+paths:
+  /imports/presign:
+    post:
+      summary: Get S3 presigned URL for CSV upload
+  /imports/commit:
+    post:
+      summary: Parse uploaded CSV and persist normalized transactions
+  /transactions:
+    get:
+      summary: List transactions (supports updated_since cursor)
+  /rules/test:
+    post:
+      summary: Dry-run a rule against sample transactions
+  /me/export:
+    post:
+      summary: Start account export job
+  /me/delete:
+    post:
+      summary: Start account deletion job
