@@ -1,0 +1,13 @@
+<form method="POST" action="/upload" enctype="multipart/form-data">
+  <input type="file" name="file" accept=".csv" />
+  <input type="submit" value="Upload" />
+</form>
+
+<div th:if="${message}">
+  <p th:text="${message}"></p>
+
+  <div th:if="${uploadedName}">
+    <p>Uploaded: <span th:text="${uploadedName}"></span></p>
+    <p>Size (bytes): <span th:text="${uploadedSize}"></span></p>
+  </div>
+</div>

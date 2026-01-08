@@ -1,0 +1,1 @@
+-- Baseline schema created manually before Flyway adoption

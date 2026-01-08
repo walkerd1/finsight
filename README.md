@@ -1,12 +1,18 @@
-## Key Docs
-- [MVP Viability & Risk Check](docs/strategy/viability_check.md)
-- [Observability](docs/observability/README.md)
-- [OSS First Policy (ADR-0003)](docs/adr/0003-oss-first-policy.md)
-- [OSS Substitutions](docs/architecture/oss_stack_substitutions.md)
-- [Contributing](CONTRIBUTING.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
+# FinSight
 
-## Next Milestone: D1 “Hello Import”
-- /imports/presign and /imports/commit working on sample CSV
-- Import summary returned; duplicates skipped
-- Logs have X-Correlation-Id; TTLs set (logs 14d, metrics 45d, traces 7d)
+Offline-first, privacy-first personal finance app (CSV import → auto-tag → period KPIs).
+
+## Quick Start
+1) Create a GitHub repo and push this starter (see commands below).
+2) Run the LifeOps metrics exporter to track runway/time.
+3) Start Sprint 1: D1 "Hello Import" (CSV → normalized → summary).
+
+### LifeOps exporter
+```bash
+python tools/metrics_exporter.py --state config/lifeops_state.json --time-log logs/time_log.csv --port 9105
+```
+
+### Repo Conventions
+- Release trains: 2 weeks
+- Conventional commits
+- Everything user-visible behind a feature flag
