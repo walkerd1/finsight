@@ -1,8 +1,21 @@
-Apache License
-Version 2.0, January 2004
-http://www.apache.org/licenses/
+Copyright (c) 2026 Dustin Walker
 
-TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+Permission is hereby granted to view, study, and evaluate the source code
+contained in this repository for personal, educational, or non-commercial
+purposes only.
 
-1. Definitions.
-... (full Apache 2.0 text should be here in your repo; truncated here for brevity)
+You may NOT:
+- Use this software for commercial purposes
+- Offer this software or a derivative as a product or service
+- Host this software as a paid or free SaaS offering
+- Redistribute this software or modified versions of it
+
+You MAY:
+- Clone and inspect the code
+- Run the software locally for evaluation
+- Reference patterns and techniques for learning
+
+Commercial licensing, redistribution rights, or alternative licensing
+may be granted explicitly by the copyright holder.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
