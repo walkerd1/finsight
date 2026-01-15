@@ -1,8 +1,14 @@
 package com.finsight.app.entity;
 
 import java.time.Instant;
+
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,7 +32,7 @@ public class RawImportFile {
 	@Column(name="original_filename", length=255)
 	private String originalFilename;
 	
-	@Column(name="content_hash", length=64, nullable=false)
+	@Column(name="content_hash", length=64)
 	private String contentHash;
 	
 	@Column(name="row_count")
@@ -35,14 +41,43 @@ public class RawImportFile {
 	@Column(name="headers_json", columnDefinition="json", nullable=false)
 	private String headersJson;
 	
-	@Column(name="imported_at", updatable=false, nullable=false)
-	private Instant importedAt;
+	@Enumerated(EnumType.STRING)
+	@Column(name="status", nullable=false)
+	private Status status = Status.RECEIVED;
+	
+	@Generated(event=EventType.INSERT)
+	@Column(name="created_at", nullable = false, updatable = false, insertable = false)
+	private Instant createdAt;
+	
+	@Column(name="finalized_at")
+	private Instant finalizedAt;
+	
+	@Column(name="failed_at")
+	private Instant failedAt;
+	
+	@Column(name="failure_reason", columnDefinition="json")
+	private String failureReason;
+	
+	@Column(name="finalized_content_hash", insertable=false, updatable=false)
+	private String finalizedContentHash;
 
-	protected RawImportFile() {
+	public RawImportFile() {
+	}
+	
+	public enum Status {
+		RECEIVED,
+		INGESTING,
+		FINALIZED,
+		FAILED,
+		DUPLICATE
 	}
 
-	public Long getId() {
-		return id;
+	public Long getAccountId() {
+		return accountId;
+	}
+
+	public void setAccountId(Long accountId) {
+		this.accountId = accountId;
 	}
 
 	public Long getImportProfileId() {
@@ -85,28 +120,55 @@ public class RawImportFile {
 		this.headersJson = headersJson;
 	}
 
-	public Instant getImportedAt() {
-		return importedAt;
+	public Status getStatus() {
+		return status;
 	}
 
-	public void setImportedAt(Instant importedAt) {
-		this.importedAt = importedAt;
+	public void setStatus(Status status) {
+		this.status = (status == null) ? Status.RECEIVED : status;
 	}
 
-	public Long getAccountId() {
-		return accountId;
+	public Instant getCreatedAt() {
+		return createdAt;
 	}
-	
-	public void setAccountId(Long accountId) {
-		this.accountId = accountId;
+
+	public Instant getFinalizedAt() {
+		return finalizedAt;
+	}
+
+	public void setFinalizedAt(Instant finalizedAt) {
+		this.finalizedAt = finalizedAt;
+	}
+
+	public Instant getFailedAt() {
+		return failedAt;
+	}
+
+	public void setFailedAt(Instant failedAt) {
+		this.failedAt = failedAt;
+	}
+
+	public String getFailureReason() {
+		return failureReason;
+	}
+
+	public void setFailureReason(String failureReason) {
+		this.failureReason = failureReason;
+	}
+
+	public String getFinalizedContentHash() {
+		return finalizedContentHash;
+	}
+
+	public Long getId() {
+		return id;
 	}
 
 	@Override
 	public String toString() {
 		return "RawImportFile [id=" + id + ", accountId=" + accountId + ", importProfileId=" + importProfileId
 				+ ", originalFilename=" + originalFilename + ", contentHash=" + contentHash + ", rowCount=" + rowCount
-				+ ", headersJson=" + headersJson + ", importedAt=" + importedAt + "]";
-	}
-	
-	
+				+ ", headersJson=" + headersJson + ", status=" + status + ", createdAt=" + createdAt + ", finalizedAt="
+				+ finalizedAt + ", failedAt=" + failedAt + ", failureReason=" + failureReason + ", finalizedContentHash=" + finalizedContentHash + "]";
+	}	
 }

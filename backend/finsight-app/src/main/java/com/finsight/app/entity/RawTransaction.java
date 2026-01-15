@@ -2,6 +2,9 @@ package com.finsight.app.entity;
 
 import java.time.Instant;
 
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,8 +24,8 @@ public class RawTransaction {
 	@Column(name="raw_file_id", nullable=false)
 	private Long rawFileId;
 	
-	@Column(name="row_number", nullable=false)
-	private Integer rowNumber;
+	@Column(name="csv_row_number", nullable=false)
+	private Integer csvRowNumber;
 	
 	@Column(name="row_json", columnDefinition="json", nullable=false)
 	private String rowJSON;
@@ -30,13 +33,14 @@ public class RawTransaction {
 	@Column(name="row_hash", length=64, nullable=false)
 	private String rowHash;
 	
-	@Column(name="ingested_at", updatable=false, nullable=false)
+	@Generated(event=EventType.INSERT)
+	@Column(name="ingested_at", nullable = false, updatable = false, insertable = false)
 	private Instant ingestedAt;
 
 	/**
 	 * 
 	 */
-	protected RawTransaction() {}
+	public RawTransaction() {}
 
 	public Long getRawFileId() {
 		return rawFileId;
@@ -46,12 +50,12 @@ public class RawTransaction {
 		this.rawFileId = rawFileId;
 	}
 
-	public Integer getRowNumber() {
-		return rowNumber;
+	public Integer getCsvRowNumber() {
+		return csvRowNumber;
 	}
 
-	public void setRowNumber(Integer rowNumber) {
-		this.rowNumber = rowNumber;
+	public void setCsvRowNumber(Integer csvRowNumber) {
+		this.csvRowNumber = csvRowNumber;
 	}
 
 	public String getRowJSON() {
@@ -74,8 +78,8 @@ public class RawTransaction {
 		return ingestedAt;
 	}
 
-	public void setIngestedAt(Instant ingetstedAt) {
-		this.ingestedAt = ingetstedAt;
+	public void setIngestedAt(Instant ingestedAt) {
+		this.ingestedAt = ingestedAt;
 	}
 
 	public Long getId() {
@@ -84,7 +88,7 @@ public class RawTransaction {
 
 	@Override
 	public String toString() {
-		return "RawTransactions [id=" + id + ", rawFileId=" + rawFileId + ", rowNumber=" + rowNumber + ", rowJSON="
-				+ rowJSON + ", rowHash=" + rowHash + ", ingetstedAt=" + ingestedAt + "]";
+		return "RawTransactions [id=" + id + ", rawFileId=" + rawFileId + ", rowNumber=" + csvRowNumber + ", rowJSON="
+				+ rowJSON + ", rowHash=" + rowHash + ", ingestedAt=" + ingestedAt + "]";
 	}
 }

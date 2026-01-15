@@ -1,10 +1,10 @@
 package com.finsight.app.mvc;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 
 import org.springframework.util.StringUtils;
 import org.slf4j.Logger;
@@ -17,14 +17,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.finsight.app.service.TransactionImportService;
+import com.finsight.app.service.TransactionImportService.ParseResult;
+
 @Controller
 public class TransactionUploadController {
 
 	private static final Logger log = LoggerFactory.getLogger(TransactionUploadController.class);
+	private final TransactionImportService importService;
 
 	@Value("${finsight.upload-dir}")
 	private String uploadDir;
 
+	public TransactionUploadController(TransactionImportService importService) {
+        this.importService = importService;
+    }
+	
 	@GetMapping("/upload")
 	public String getUploadPage() {
 		return "upload";
@@ -74,13 +82,13 @@ public class TransactionUploadController {
 
 			Files.createDirectories(base); // Ensure directory exists
 			try (InputStream in = file.getInputStream()) {
-				Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
+				ParseResult parsedResult = importService.parseCsv(1L, 1L, filename, in);
+				redirectAttributes.addFlashAttribute("message", "File successfully uploaded!");
+				redirectAttributes.addFlashAttribute("uploadedName", filename);
+				redirectAttributes.addFlashAttribute("uploadedSize", file.getSize());
+				redirectAttributes.addFlashAttribute("rowCount", parsedResult.rowsParsed());
+				return "redirect:/upload";
 			}
-
-			redirectAttributes.addFlashAttribute("message", "File successfully uploaded!");
-			redirectAttributes.addFlashAttribute("uploadedName", filename);
-			redirectAttributes.addFlashAttribute("uploadedSize", file.getSize());
-			return "redirect:/upload";
 		} catch (IOException e) {
 			log.error("Upload failed for file: {}", filename, e);
 			redirectAttributes.addFlashAttribute("message", "Failed to upload file.");
