@@ -1,10 +1,18 @@
-# Java/Gradle
-/build/
-/out/
+# Java / Maven
+**/target/
+**/build/
+**/out/
 .gradle/
-/target/
 
-# Flutter
+# IDEs
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+
+# Flutter (if ever used)
 .dart_tool/
 .build/
 
