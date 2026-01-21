@@ -1,0 +1,1 @@
+INSERT INTO raw_import_files (account_id, headers_json, status) VALUES (1, '[]', 'INGESTING')
