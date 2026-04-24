@@ -17,7 +17,6 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import tools.jackson.databind.ObjectMapper;
@@ -84,6 +83,7 @@ public class TransactionImportService {
 			f.setImportProfileId(importProfileId);
 			f.setOriginalFilename(originalFileName);
 			f.setStatus(RawImportFile.Status.RECEIVED);
+			f.setHeadersJson("[]");
 			return rawImportFileRepo.saveAndFlush(f);
 		});
 
@@ -97,15 +97,15 @@ public class TransactionImportService {
 
 		int rowsSeen = 0;
 		int rowsInserted = 0;
-		int rowsFailed = 0;
-		List<RowFailure> failures = new ArrayList<>();
+		List<RowFailure> sampleFailures = new ArrayList<>();
 
 		try (DigestInputStream dIn = new DigestInputStream(in, fileDigest);
 				CSVParser parser = new  CSVParser(
 						new BufferedReader(
 								new InputStreamReader(dIn, StandardCharsets.UTF_8)), format)) {
 
-			String jsonHeader = mapper.writeValueAsString(parser.getHeaderNames());
+			List<String> headerNames = parser.getHeaderNames();
+			String jsonHeader = mapper.writeValueAsString(headerNames);
 
 			tx.executeWithoutResult(status -> {
 				RawImportFile f = rawImportFileRepo.findById(rawFileId).orElseThrow();
@@ -121,9 +121,10 @@ public class TransactionImportService {
 
 				try {
 					String rowJson = mapper.writeValueAsString(record.toMap());
+					String canonicalRow = canonicalRowString(record, headerNames);
 
 					rowDigest.reset();
-					rowDigest.update(rowJson.getBytes(StandardCharsets.UTF_8));
+					rowDigest.update(canonicalRow.getBytes(StandardCharsets.UTF_8));
 					RawTransaction rt = new RawTransaction();
 					rt.setRawFileId(rawFileId);
 					rt.setCsvRowNumber(csvRowNumber);
@@ -133,45 +134,49 @@ public class TransactionImportService {
 					buffer.add(rt);
 
 				} catch (Exception rowEx) {
-					rowsFailed++;
-					if (failures.size() < MAX_FAILURE_SAMPLES) {
-						failures.add(new RowFailure(csvRowNumber, safeMessage(rowEx)));
+					if (sampleFailures.size() < MAX_FAILURE_SAMPLES) {
+						sampleFailures.add(new RowFailure(csvRowNumber, safeMessage(rowEx)));
 					}
 				}
 
 				if (buffer.size() >= DEFAULT_BATCH_SIZE) {
-					rowsInserted += persistBatchWithIsolation(buffer, failures);
+					rowsInserted += persistBatchWithIsolation(buffer, sampleFailures);
 					buffer.clear();
 				}
 			}
 
 			if (!buffer.isEmpty()) {
-				rowsInserted += persistBatchWithIsolation(buffer, failures);
+				rowsInserted += persistBatchWithIsolation(buffer, sampleFailures);
 				buffer.clear();				
 			}
 
 			String contentHashHex = toHexLower(fileDigest.digest());
 			Instant finishedAt = Instant.now();
+			int finalRowsSeen = rowsSeen;
+			int finalRowsInserted = rowsInserted;
+			int finalRowsFailed = finalRowsSeen - finalRowsInserted;
+			RawImportFile.Status finalStatus =
+				    finalRowsFailed > 0 ? RawImportFile.Status.FINALIZED_WITH_ERRORS : RawImportFile.Status.FINALIZED;
 
 			tx.executeWithoutResult(status -> {
 				RawImportFile f = rawImportFileRepo.findById(rawFileId).orElseThrow();
-				f.setRowCount(rowsSeen);
+				f.setRowCount(finalRowsSeen);
 				f.setContentHash(contentHashHex);
 				f.setFinalizedAt(finishedAt);
-				f.setStatus(RawImportFile.Status.FINALIZED);
+				f.setStatus(finalStatus);
 				rawImportFileRepo.saveAndFlush(f);
 
 			});
 			return new ImportSummary(
 					rawFileId,
 					originalFileName,
-					rowsSeen,
-					rowsInserted,
-					rowsFailed + (rowsSeen - rowsInserted - rowsFailed),
+					finalRowsSeen,
+					finalRowsInserted,
+					finalRowsFailed,
 					contentHashHex,
 					startedAt,
 					finishedAt,
-					failures);
+					sampleFailures);
 		} catch (Exception ex) {
 			tx.executeWithoutResult(status -> {
 				RawImportFile f = rawImportFileRepo.findById(rawFileId).orElseThrow();
@@ -184,6 +189,21 @@ public class TransactionImportService {
 
 	}
 
+	private static String canonicalRowString(CSVRecord record, List<String> headerNames) {
+		StringBuilder sb = new StringBuilder();
+
+		for (String header : headerNames) {
+			String value = record.isMapped(header) ? record.get(header) : "";
+
+			sb.append(header)
+			  .append('=')
+			  .append(value == null ? "" : value.trim())
+			  .append('\n');
+		}
+
+		return sb.toString();
+	}
+	
 	private int persistBatchWithIsolation(List<RawTransaction> batch, List<RowFailure> failures) {
 		try {
 			return tx.execute(status -> {
