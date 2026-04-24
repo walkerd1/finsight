@@ -34,5 +34,28 @@ jobs:
           name: finsight-app-jar
           path: backend/finsight-app/target/*.jar
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Build Docker image
-        run: docker build -t finsight-app:latest .
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/finsight-app:latest \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/finsight-app:${{ github.sha }} \
+            .
+
+      - name: Smoke test Docker image
+        run: |
+          docker run -d --name finsight-smoke -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/finsight-app:latest
+          sleep 20
+          docker logs finsight-smoke
+          docker stop finsight-smoke
+          docker rm finsight-smoke
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/finsight-app:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/finsight-app:${{ github.sha }}
