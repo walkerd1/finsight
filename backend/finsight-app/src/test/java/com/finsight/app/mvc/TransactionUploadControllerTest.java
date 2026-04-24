@@ -23,6 +23,9 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.finsight.app.mvc.upload.UploadRequest;
+import com.finsight.app.mvc.upload.UploadValidationException;
+import com.finsight.app.mvc.upload.UploadValidator;
 import com.finsight.app.service.TransactionImportService;
 import com.finsight.app.service.TransactionImportService.ImportSummary;
 
@@ -37,6 +40,9 @@ class TransactionUploadControllerTest {
 
     @MockitoBean
     TransactionImportService importService;
+    
+    @MockitoBean
+    private UploadValidator uploadValidator;
 
     @TempDir
     static Path tempDir;
@@ -64,6 +70,9 @@ class TransactionUploadControllerTest {
     			"transactions.csv",
     			"text/csv",
     			csvBytes);
+    	
+    	when(uploadValidator.validateCsv(any()))
+        .thenReturn(new UploadRequest("transactions.csv", file.getSize()));
     	
     	when(importService.parseCsv(anyLong(), anyLong(), anyString(), any(InputStream.class))).thenReturn(
     			new ImportSummary(
@@ -101,6 +110,8 @@ class TransactionUploadControllerTest {
     			"text/csv",
     			csvBytes);
     	
+    	when(uploadValidator.validateCsv(any()))
+        .thenThrow(new UploadValidationException("File is empty. File must be non empty."));
     	
     	mockMvc.perform(multipart("/upload").file(file))
         .andExpect(status().is3xxRedirection())
