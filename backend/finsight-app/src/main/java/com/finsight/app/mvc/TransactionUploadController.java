@@ -14,7 +14,7 @@ import com.finsight.app.mvc.upload.UploadProcessingException;
 import com.finsight.app.mvc.upload.UploadRequest;
 import com.finsight.app.mvc.upload.UploadValidator;
 import com.finsight.app.service.TransactionImportService;
-import com.finsight.app.service.TransactionImportService.ParseResult;
+import com.finsight.app.service.TransactionImportService.ImportSummary;
 
 @Controller
 public class TransactionUploadController {
@@ -43,12 +43,16 @@ public class TransactionUploadController {
 	    UploadRequest req = uploadValidator.validateCsv(file);
 
 	    try (InputStream in = file.getInputStream()) {
-	      ParseResult parsedResult = importService.parseCsv(1L, 1L, req.filename(), in);
+	      ImportSummary importSummary = importService.parseCsv(1L, 1L, req.filename(), in);
 
-	      ra.addFlashAttribute("message", "File successfully uploaded!");
+	      if (importSummary.rowsFailed() > 0) {
+	    	  ra.addFlashAttribute("message", "File uploaded with some row errors.");
+	    	} else {
+	    	  ra.addFlashAttribute("message", "File successfully uploaded!");
+	    	}
 	      ra.addFlashAttribute("uploadedName", req.filename());
 	      ra.addFlashAttribute("uploadedSize", req.sizeBytes());
-	      ra.addFlashAttribute("rowCount", parsedResult.rowsParsed());
+	      ra.addFlashAttribute("rowCount", importSummary.rowsInserted());
 	      return REDIRECT_UPLOAD;
 
 	    } catch (Exception e) {

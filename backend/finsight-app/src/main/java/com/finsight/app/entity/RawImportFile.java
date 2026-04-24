@@ -68,6 +68,7 @@ public class RawImportFile {
 		RECEIVED,
 		INGESTING,
 		FINALIZED,
+		FINALIZED_WITH_ERRORS,
 		FAILED,
 		DUPLICATE
 	}
