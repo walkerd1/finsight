@@ -1,0 +1,62 @@
+name: "Requirement"
+description: "Define a FinSight requirement"
+title: "[REQ-XXX] <Short Title>"
+labels: ["type: requirement", "status: draft"]
+assignees: []
+
+body:
+  - type: input
+    id: requirement_id
+    attributes:
+      label: Requirement ID
+      placeholder: REQ-001
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is this requirement?
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Define how we know this requirement is complete
+      placeholder: |
+        - User can...
+        - System must...
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is included / excluded?
+
+  - type: textarea
+    id: related_features
+    attributes:
+      label: Related Features / Notes
+
+  - type: textarea
+    id: linked_tasks
+    attributes:
+      label: Linked Tasks
+
+  - type: textarea
+    id: validation_tests
+    attributes:
+      label: Validation Tests
+      description: What tests validate this requirement?
+
+  - type: dropdown
+    id: status
+    attributes:
+      label: Status
+      options:
+        - Draft
+        - Approved
+        - In Progress
+        - Implemented
+        - Verified

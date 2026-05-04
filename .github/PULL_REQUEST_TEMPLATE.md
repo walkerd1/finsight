@@ -1,10 +1,15 @@
-### Summary
-(what this PR does)
+## What does this PR do?
+-
 
-### Checklist
-- [ ] One thin slice
-- [ ] Tests added/updated
-- [ ] User-visible changes behind Unleash flag
-- [ ] Docs updated / ADR linked
-- [ ] No secrets committed (SOPS/age)
-- [ ] Retention/TTL set for new logs/metrics/traces
+## Requirement
+Implements: REQ-XXX
+
+## Related Issues
+Closes #
+
+## Tests
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
+
+## Validation
+Describe how this satisfies the requirement
