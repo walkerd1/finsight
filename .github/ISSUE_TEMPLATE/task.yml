@@ -1,0 +1,27 @@
+name: "Task"
+description: "Implementation task linked to a requirement"
+title: "[TASK] <Short Title>"
+labels: ["type: task"]
+assignees: []
+
+body:
+  - type: input
+    id: related_requirement
+    attributes:
+      label: Related Requirement
+      placeholder: REQ-001
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+
+  - type: textarea
+    id: implementation_notes
+    attributes:
+      label: Implementation Notes
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation Steps
